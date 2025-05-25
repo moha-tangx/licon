@@ -1,0 +1,18 @@
+{
+  "name": "licon",
+  "version": "1.0.0",
+  "description": "listing directories with icons",
+  "main": "./src/index.ts",
+  "scripts": {
+    "build":"bash ./build",
+    "install":"bash ./install"
+  },
+  "keywords": [],
+  "author": {
+    "name":"moha_tangx",
+    "email":"muhammadstangaza@gmail.com"
+  },
+  "license": "MIT",
+  "type": "module",
+  "bin":"./bin/index.js"
+}
