@@ -132,13 +132,12 @@ setSelectedOptions(PASSED_ARGS)
 
 async function ListEntries(selections: string[]) {
   for (const selection of selections) {
-    let entries = await readdir(selection, { recursive: SELECTED_OPIONS.recursive.selected, withFileTypes: SELECTED_OPIONS.show_class.selected })
+    let entries = await readdir(selection, { recursive: SELECTED_OPIONS.recursive.selected, withFileTypes: true })
     for (const key in SELECTED_OPIONS) {
       const option = SELECTED_OPIONS[key];
       entries = option.selected ? option.action(entries) : entries
     }
     entries.forEach(entry => print(entry))
-    print("")
   }
 }
 
