@@ -10,12 +10,18 @@ type Dirent = {
   type: number
 }
 
-const SELECTED_OPIONS = {
-  all: { selected: false, action: (entries: Dirent[]) => { return entries.map(e => !e.name.startsWith(".")) } },
+const entryType = {
+  1: { name: "regFile", "symbol": "" },
+  2: { name: "Dir", "symbol": "/" },
+  3: { name: "", "symbol": "" },
+  4: { name: "regFile", "symbol": "" },
+}
+const SELECTED_OPTIONS = {
+  all: { selected: false, action: null },
   long: { selected: false, action: (entries: Dirent[]) => { return entries } },
   colored: { selected: true, action: (entries: Dirent[]) => { return entries } },
   vertical: { selected: false, action: (entries: Dirent[]) => { return entries } },
-  recursive: { selected: false, action: (entries: Dirent[]) => { return entries } },
+  recursive: { selected: false, action: null },
   show_type: { selected: false, action: (entries: Dirent[]) => { return entries } },
   show_size: { selected: false, action: (entries: Dirent[]) => { return entries } },
   show_class: { selected: false, action: (entries: Dirent[]) => { return entries } },
@@ -31,20 +37,20 @@ const SELECTED_PATHS: string[] = []
 
 const AVAILABLE_OPTIONS = {
   "help": { set: () => { usageMessage() }, desc: "shows this help message" },
-  "l": { set: () => { SELECTED_OPIONS.long.selected = true }, desc: "long list" },
-  "file-type": { set: () => { SELECTED_OPIONS.show_type.selected = true }, desc: "" },
-  "classify": { set: () => { SELECTED_OPIONS.show_class.selected = true }, desc: "" },
-  "R": { set: () => { SELECTED_OPIONS.recursive.selected = true }, desc: "recursive" },
-  "a": { set: () => { SELECTED_OPIONS.all.selected = true }, desc: "list all content" },
-  "A": { set: () => { SELECTED_OPIONS.almost_all.selected = true }, desc: "almost all" },
-  "g": { set: () => { SELECTED_OPIONS.show_group.selected = true }, desc: "show group" },
-  "s": { set: () => { SELECTED_OPIONS.show_size.selected = true }, desc: "show file size" },
-  "x": { set: () => { SELECTED_OPIONS.vertical.selected = false }, desc: "print horiontaly" },
-  "F": { set: () => { SELECTED_OPIONS.show_class.selected = true }, desc: "show file type " },
-  "1": { set: () => { SELECTED_OPIONS.vertical.selected = true }, desc: "list in one column" },
-  "author": { set: () => { SELECTED_OPIONS.show_author.selected = true }, desc: "show author" },
-  "fomart": {
-    set: (fomart: string) => { SELECTED_OPIONS.formart.selected = fomart }, desc: "set printing fomart",
+  "l": { set: () => { SELECTED_OPTIONS.long.selected = true }, desc: "long list" },
+  "file-type": { set: () => { SELECTED_OPTIONS.show_type.selected = true }, desc: "" },
+  "classify": { set: () => { SELECTED_OPTIONS.show_class.selected = true }, desc: "" },
+  "R": { set: () => { SELECTED_OPTIONS.recursive.selected = true }, desc: "recursive" },
+  "a": { set: () => { SELECTED_OPTIONS.all.selected = true }, desc: "list all content" },
+  "A": { set: () => { SELECTED_OPTIONS.almost_all.selected = true }, desc: "almost all" },
+  "g": { set: () => { SELECTED_OPTIONS.show_group.selected = true }, desc: "show group" },
+  "s": { set: () => { SELECTED_OPTIONS.show_size.selected = true }, desc: "show file size" },
+  "x": { set: () => { SELECTED_OPTIONS.vertical.selected = false }, desc: "print horizontally" },
+  "F": { set: () => { SELECTED_OPTIONS.show_class.selected = true }, desc: "show file type " },
+  "1": { set: () => { SELECTED_OPTIONS.vertical.selected = true }, desc: "list in one column" },
+  "author": { set: () => { SELECTED_OPTIONS.show_author.selected = true }, desc: "show author" },
+  "format": {
+    set: (format: string) => { SELECTED_OPTIONS.formart.selected = format }, desc: "set printing format",
     options: ["across", "commas", "horizonatl", "long", "vertical", "verbose"]
   }
 }
@@ -60,11 +66,12 @@ function badArgumentMessage(prog_name: string, passed_opt: string, required: boo
 Try ${prog_name} --help for more information`)
   exit(1)
 }
+
 function usageMessage() {
   print(`
   Usage: licon [OPTION]... [FILE]...
   list information about the FILEs with ICONS.
-`)
+  `)
   for (let opt in AVAILABLE_OPTIONS) {
     // print("in loop")
     // meaning: it's a short 
@@ -130,14 +137,48 @@ function setSelectedOptions(passed_args: string[]) {
 
 setSelectedOptions(PASSED_ARGS)
 
+function transformEntries(entries: Dirent[]) {
+
+  for (const key in SELECTED_OPTIONS) {
+    const option = SELECTED_OPTIONS[key];
+    // if option is selected and option has a transform action call the action with entries as arg
+    entries = option.selected && option.action ? option.action(entries) : entries
+  }
+  // if -a flag not passed remove files starting with period (.)
+  if (!(SELECTED_OPTIONS.all.selected || SELECTED_OPTIONS.almost_all.selected)) {
+    entries = entries.filter((e: Dirent) => !e.name.startsWith("."))
+  }
+  // if -a flag passed add the current(.) and parent(..) directories
+  if (SELECTED_OPTIONS.all.selected) {
+    for (let dirName of ["..", "."]) {
+      entries.unshift({ name: dirName, type: 2, parentPath: null })
+    }
+  }
+
+  return entries
+}
+
 async function ListEntries(selections: string[]) {
   for (const selection of selections) {
-    let entries = await readdir(selection, { recursive: SELECTED_OPIONS.recursive.selected, withFileTypes: true })
-    for (const key in SELECTED_OPIONS) {
-      const option = SELECTED_OPIONS[key];
-      entries = option.selected ? option.action(entries) : entries
+    // if more than one dir is selected, specify directory being listed
+    if (selections.length > 1) print(`${selection}:`)
+
+    let entries: Dirent<string>[] = []
+    try {
+      entries = await readdir(selection, { recursive: false, withFileTypes: true })
+    } catch (err) {
+      // if entry selection is a file list the file
+      if (err.errno == -20) entries.push({ name: selection, type: 2, parentPath: null })
+      else {
+        print(err.message.substring(err.message.indexOf(":") + 2))
+        return
+      }
     }
-    entries.forEach(entry => print(entry))
+    entries = transformEntries(entries)
+    entries.forEach(entry => print(entry.name))
+
+    // add a blank line if it is not the last listed entry
+    if (selections.indexOf(selection) !== selections.length - 1) print("")
   }
 }
 
