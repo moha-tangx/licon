@@ -1,12 +1,31 @@
-import { argv, exit } from "node:process"
+import { argv, exit, env } from "node:process"
 import { log as print } from "node:console"
-import { readdir } from "node:fs/promises"
+import { readdir, readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { Dirent, statSync } from "node:fs"
 
+const HOME = env.HOME
+
 const PASSED_ARGS = argv.slice(2)
 
+const default_config_file_path = join(`${HOME}`, ".config/licon/config.json")
+const config_file_path = env.config_file_path ?? default_config_file_path;
+
+let config: {
+  [name: string]: { char: string, extentions: string[], color: string }
+}
+try {
+  let fileContent = await readFile(config_file_path, { encoding: "utf8" })
+  config = JSON.parse(fileContent)
+} catch {
+  config = {
+    "file": { "char": "", "extentions": [], "color": "" },
+    "folder": { "char": "", "extentions": [], "color": "" }
+  }
+}
+
 //statSync(join(e.parentPath, e.name)).size.toString().padStart(4, "0")
+
 const SELECTED_OPTIONS = {
   all: { selected: false, action: null },
   long: { selected: false, action: (entries: Dirent[]) => { return entries } },
@@ -150,6 +169,15 @@ function transformEntries(entries: Dirent[]) {
     entries = option.selected && option.action ? option.action(entries) : entries
   }
 
+  // add the ICONS
+  for (const entry of entries) {
+    for (const key in config) {
+      if (config[key].extentions.some(ext => entry.name.endsWith(ext))) {
+        entry.name = config[key].char + " " + entry.name
+        break
+      }
+    }
+  }
   return entries
 }
 
