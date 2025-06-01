@@ -1,6 +1,8 @@
 import { argv, exit } from "node:process"
 import { log as print } from "node:console"
 import { readdir } from "node:fs/promises"
+import { join } from "node:path"
+import { stat, statSync } from "node:fs"
 
 const PASSED_ARGS = argv.slice(2)
 
@@ -10,12 +12,7 @@ type Dirent = {
   type: number
 }
 
-const entryType = {
-  1: { name: "regFile", "symbol": "" },
-  2: { name: "Dir", "symbol": "/" },
-  3: { name: "", "symbol": "" },
-  4: { name: "regFile", "symbol": "" },
-}
+//statSync(join(e.parentPath, e.name)).size.toString().padStart(4, "0")
 const SELECTED_OPTIONS = {
   all: { selected: false, action: null },
   long: { selected: false, action: (entries: Dirent[]) => { return entries } },
@@ -139,11 +136,6 @@ setSelectedOptions(PASSED_ARGS)
 
 function transformEntries(entries: Dirent[]) {
 
-  for (const key in SELECTED_OPTIONS) {
-    const option = SELECTED_OPTIONS[key];
-    // if option is selected and option has a transform action call the action with entries as arg
-    entries = option.selected && option.action ? option.action(entries) : entries
-  }
   // if -a flag not passed remove files starting with period (.)
   if (!(SELECTED_OPTIONS.all.selected || SELECTED_OPTIONS.almost_all.selected)) {
     entries = entries.filter((e: Dirent) => !e.name.startsWith("."))
@@ -155,13 +147,19 @@ function transformEntries(entries: Dirent[]) {
     }
   }
 
+  for (const key in SELECTED_OPTIONS) {
+    const option = SELECTED_OPTIONS[key];
+    // if option is selected and option has a transform action call the action with entries as arg
+    entries = option.selected && option.action ? option.action(entries) : entries
+  }
+
   return entries
 }
 
 async function ListEntries(selections: string[]) {
   for (const selection of selections) {
     // if more than one dir is selected, specify directory being listed
-    if (selections.length > 1) print(`${selection}:`)
+    if (selections.length > 1 && statSync(selection).isDirectory()) print(`${selection}:`)
 
     let entries: Dirent<string>[] = []
     try {
@@ -175,10 +173,18 @@ async function ListEntries(selections: string[]) {
       }
     }
     entries = transformEntries(entries)
+    if (SELECTED_OPTIONS.recursive.selected) print(`${selection}:`)
     entries.forEach(entry => print(entry.name))
 
     // add a blank line if it is not the last listed entry
-    if (selections.indexOf(selection) !== selections.length - 1) print("")
+    if (selections.indexOf(selection) !== selections.length - 1 || SELECTED_OPTIONS.recursive.selected) print("")
+
+    if (SELECTED_OPTIONS.recursive.selected) {
+      // remove "." and ".." before recursion
+      if (SELECTED_OPTIONS.all.selected) entries.splice(0, 2)
+
+      entries.filter(e => e.isDirectory()).forEach(e => ListEntries([join(e.parentPath, e.name)]))
+    }
   }
 }
 
