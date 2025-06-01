@@ -2,7 +2,7 @@ import { argv, exit } from "node:process";
 import { log as print } from "node:console";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
-import { statSync } from "node:fs";
+import { Dirent, statSync } from "node:fs";
 const PASSED_ARGS = argv.slice(2);
 //statSync(join(e.parentPath, e.name)).size.toString().padStart(4, "0")
 const SELECTED_OPTIONS = {
@@ -125,7 +125,10 @@ function transformEntries(entries) {
     // if -a flag passed add the current(.) and parent(..) directories
     if (SELECTED_OPTIONS.all.selected) {
         for (let dirName of ["..", "."]) {
-            entries.unshift({ name: dirName, type: 2, parentPath: null });
+            const ent = new Dirent();
+            ent.name = dirName;
+            ent.isDirectory = () => true;
+            entries.unshift(ent);
         }
     }
     for (const key in SELECTED_OPTIONS) {
@@ -146,8 +149,11 @@ async function ListEntries(selections) {
         }
         catch (err) {
             // if entry selection is a file list the file
+            const ent = new Dirent();
+            ent.name = selection;
+            ent.isDirectory = () => true;
             if (err.errno == -20)
-                entries.push({ name: selection, type: 2, parentPath: null });
+                entries.push(ent);
             else {
                 print(err.message.substring(err.message.indexOf(":") + 2));
                 return;
