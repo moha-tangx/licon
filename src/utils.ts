@@ -1,5 +1,5 @@
 import { exit } from "node:process";
-import { Options } from "./types/types.js";
+import { Flags } from "./types/types.js";
 import { log as print } from "node:console";
 
 const COLORS = {
@@ -34,26 +34,33 @@ Try ${prog_name} --help for more information`)
   exit(1)
 }
 
-export function usageMessage(AVAILABLE_OPTIONS: Options) {
+export function usageMessage(FLAGS: Flags) {
   print(`
   Usage: licon [OPTION]... [FILE]...
   list information about the FILEs with ICONS.
   `)
-  for (let opt in AVAILABLE_OPTIONS) {
+  // to get the longest flag name
+  let len = 0
+  Object.keys(FLAGS).forEach(f => (f.length > len) && (len = f.length + 10))
+
+  for (let opt in FLAGS) {
     // print("in loop")
     // meaning: it's a short 
+    let desc = FLAGS[opt].desc
+    desc = desc.padStart(desc.length - opt.length + len)
+
     if (opt.length < 2) {
-      print(`  -${opt}      ${AVAILABLE_OPTIONS[opt].desc}`)
+      print(`  -${opt} ${desc}`)
       continue
     }
     // meaning: it needs argument
-    if (AVAILABLE_OPTIONS[opt].set.length > 0) {
-      print(`  --${opt}=${opt} ${AVAILABLE_OPTIONS[opt].desc}`)
+    if (FLAGS[opt].args?.length > 0) {
+      print(`  --${opt}=${opt} ${FLAGS[opt].desc}`)
       continue
 
     }
     // long but does not need argument
-    print(`  --${opt}     ${AVAILABLE_OPTIONS[opt].desc}`)
+    print(`  --${opt}${desc}`)
   }
 
   exit(0)
