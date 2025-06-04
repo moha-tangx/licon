@@ -40,8 +40,7 @@ export function usageMessage(FLAGS: Flags) {
   list information about the FILEs with ICONS.
   `)
   // to get the longest flag name
-  let len = 0
-  Object.keys(FLAGS).forEach(f => (f.length > len) && (len = f.length + 10))
+  let len = Object.keys(FLAGS).map((f) => f.length).reduce((p, v) => v > p ? v : p)
 
   for (let opt in FLAGS) {
     // print("in loop")
