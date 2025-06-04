@@ -1,4 +1,6 @@
-export const COLORS = {
+import { exit } from "node:process";
+import { log as print } from "node:console";
+const COLORS = {
     RESET: "\x1B[0m",
     RED: "\x1B[38;5;1m",
     BLUE: "\x1B[38;5;4m",
@@ -13,3 +15,38 @@ export const COLORS = {
     DEFAULT_FILE: "\x1B[38;5;4m",
     DEFAULT_DIRECTORY: "\x1B[38;5;4m",
 };
+export function getColor(color) {
+    return color.startsWith("$") ? COLORS[color.substring(1).toUpperCase()] : color;
+}
+export function badOptionMessage(prog_name, passed_opt) {
+    print(`${prog_name}: invalid  option -- '${passed_opt}'
+Try ${prog_name} --help for more information`);
+    exit(1);
+}
+export function badArgumentMessage(prog_name, passed_opt, required) {
+    print(`${prog_name}: option --'${passed_opt} ${!required && "does not allow"} ${required && "requires"} an argument'
+Try ${prog_name} --help for more information`);
+    exit(1);
+}
+export function usageMessage(AVAILABLE_OPTIONS) {
+    print(`
+  Usage: licon [OPTION]... [FILE]...
+  list information about the FILEs with ICONS.
+  `);
+    for (let opt in AVAILABLE_OPTIONS) {
+        // print("in loop")
+        // meaning: it's a short 
+        if (opt.length < 2) {
+            print(`  -${opt}      ${AVAILABLE_OPTIONS[opt].desc}`);
+            continue;
+        }
+        // meaning: it needs argument
+        if (AVAILABLE_OPTIONS[opt].set.length > 0) {
+            print(`  --${opt}=${opt} ${AVAILABLE_OPTIONS[opt].desc}`);
+            continue;
+        }
+        // long but does not need argument
+        print(`  --${opt}     ${AVAILABLE_OPTIONS[opt].desc}`);
+    }
+    exit(0);
+}
