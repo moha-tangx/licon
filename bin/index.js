@@ -11,7 +11,7 @@ const PASSED_ARGS = argv.slice(2);
 const default_config_file_path = join(`${HOME}`, ".config/licon/config.json");
 const config_file_path = env.licon_config ?? default_config_file_path;
 const default_config = {
-    "file": { "char": "", "extentions": [], "color": "" },
+    "file": { "char": "", "extentions": [], "color": "" },
     "folder": { "char": "", "extentions": [], "color": "" }
 };
 let config;
@@ -72,8 +72,9 @@ function setSelectedFlags(passed_args) {
 setSelectedFlags(PASSED_ARGS);
 function matchFile(config, entry) {
     for (const key in config) {
+        const ent_name = entry.isDirectory() ? entry.name + "/" : entry.name;
         const { color, char, extentions } = config[key];
-        if (extentions.some(ext => entry.name.endsWith(ext))) {
+        if (extentions.some(ext => ent_name.endsWith(ext))) {
             entry.icon = char;
             entry.color = getColor(color);
             return entry;
