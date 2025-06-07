@@ -4,15 +4,17 @@
   "description": "listing directories with icons",
   "main": "./src/index.ts",
   "scripts": {
-    "build":"bash ./build",
-    "install":"bash ./install"
+    "build": "bash ./build.sh",
+    "install": "bash ./install.sh",
+    "compile": "tsc --watch",
+    "dev": "node ./out/index.js"
   },
   "keywords": [],
   "author": {
-    "name":"moha_tangx",
-    "email":"muhammadstangaza@gmail.com"
+    "name": "moha_tangx",
+    "email": "muhammadstangaza@gmail.com"
   },
   "license": "MIT",
   "type": "module",
-  "bin":"./bin/index.js"
+  "bin": "./bin/index.js"
 }
