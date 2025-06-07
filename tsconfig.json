@@ -3,7 +3,7 @@
     "resolveJsonModule": true,
     "module": "NodeNext",
     "moduleResolution": "nodenext",
-    "outDir": "./bin",
-    "rootDir": "./src",
+    "outDir": "./out",
+    "rootDir": "./src"
   }
 }
