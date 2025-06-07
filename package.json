@@ -16,7 +16,7 @@
   },
   "homepage": "https://github.com/moha-tangx/licon#readme",
   "man": [
-    "./man/man.1"
+    "./man/licon.1.gz"
   ],
   "readme": "./README.md",
   "licenses": [
