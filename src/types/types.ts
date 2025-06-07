@@ -1,5 +1,5 @@
 import { Stats, statSync } from "node:fs";
-import { join } from "node:path";
+import { join, parse } from "node:path";
 
 export class Entry {
   icon: string;
@@ -23,7 +23,7 @@ export class Entry {
   ) {
     this.icon = icon;
     this.type = type;
-    this.name = name;
+    this.name = parse(join(parentPath, name)).base;
     this.size = size;
     this.group = group;
     this.color = color;
