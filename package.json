@@ -3,18 +3,46 @@
   "version": "1.0.0",
   "description": "listing directories with icons",
   "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "os": [
+    "linux",
+    "dirwin",
+    "windows"
+  ],
+  "repository": {
+    "type": "git",
+    "directory": "./.git",
+    "url": "https://github.com/moha-tangx/licon"
+  },
+  "homepage": "https://github.com/moha-tangx/licon#readme",
+  "man": [
+    "./man/man.1"
+  ],
+  "readme": "./README.md",
+  "licenses": [
+    "MIT"
+  ],
+  "contributors": [
+    "moha_tangx <muhammadstangaza@gmail.com>"
+  ],
   "scripts": {
     "build": "bash ./build.sh",
     "install": "bash ./install.sh",
     "compile": "tsc --watch",
     "dev": "node ./out/index.js"
   },
-  "keywords": [],
+  "keywords": [
+    "files",
+    "ls",
+    "commands"
+  ],
   "author": {
     "name": "moha_tangx",
     "email": "muhammadstangaza@gmail.com"
   },
   "license": "MIT",
   "type": "module",
-  "bin": "./bin/licon"
+  "bin": {
+    "licon": "bin/licon"
+  }
 }
