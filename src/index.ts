@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 import { join } from "node:path"
 import { statSync } from "node:fs"
 import { argv, env } from "node:process"
