@@ -29,7 +29,8 @@
     "build": "bash ./build.sh",
     "install": "bash ./install.sh",
     "compile": "tsc --watch",
-    "dev": "node ./out/index.js"
+    "dev": "node ./out/index.js",
+    "test": "bash ./build.sh;./bin/licon"
   },
   "keywords": [
     "files",
