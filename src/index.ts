@@ -82,13 +82,13 @@ function matchFile(config: Config, entry: Entry) {
     const { color, char, extentions } = config[key]
     if (extentions.some(ext => ent_name.endsWith(ext))) {
       entry.icon = char
-      entry.color = getColor(color)
+      entry.icon_color = getColor(color)
       return entry
     }
   }
   let icon = entry.isDirectory() ? default_config.folder.char : default_config.file.char
   entry.icon = icon
-  entry.color = getColor("$blue")
+  entry.icon_color = getColor("$blue")
   return entry
 }
 

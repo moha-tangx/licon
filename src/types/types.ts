@@ -6,7 +6,7 @@ export class Entry {
   size: string;
   type: string;
   name: string;
-  color: string;
+  icon_color: string;
   group: string;
   owner: string;
   baseEnt: Stats;
@@ -26,7 +26,7 @@ export class Entry {
     this.name = parse(join(parentPath, name)).base;
     this.size = size;
     this.group = group;
-    this.color = color;
+    this.icon_color = color;
     this.owner = owner;
     this.parentPath = parentPath;
     this.baseEnt = statSync(join(parentPath, name));
@@ -36,7 +36,7 @@ export class Entry {
   }
   print() {
     const reset = "\x1B[0m";
-    const ent = `${this.group}${this.owner}${this.size}${this.color}${this.icon} ${reset}${this.name}${this.type}`;
+    const ent = `${this.group}${this.owner}${this.size}${this.icon_color}${this.icon} ${reset}${this.name}${this.type}`;
     console.log(ent);
   }
 }
