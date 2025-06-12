@@ -143,8 +143,8 @@ async function ListEntries(selections: string[]) {
       // if entry selection is a file list the file
       if (err.errno == -20) entries.push(new Entry(selection))
       else {
-        print(err.message.substring(err.message.indexOf(":") + 2))
-        return
+        // print(err.message.substring(err.message.indexOf(":") + 2))
+        throw err
       }
     }
 
