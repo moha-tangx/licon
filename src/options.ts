@@ -1,6 +1,8 @@
+import Entry from "./types/types.js"
+import { usageMessage } from "./utils.js"
 import { Flags, Options } from "./types/types.js"
-import { Entry } from "./types/types.js"
-import { getColor, usageMessage } from "./utils.js"
+
+// entries to be listed
 export let SELECTED_PATHS: string[] = []
 
 // flags maps to options
@@ -20,23 +22,14 @@ export const FLAGS: Flags = {
 
 // options and their corresponding actions
 export const OPTIONS: Options = {
-  all: { selected: false, action: null },
+  long: { selected: false, action: null },
+  symbol: { selected: false, action: null },
+  size: { selected: false, action: null },
+  owner: { selected: false, action: null },
+  group: { selected: false, action: null },
+  author: { selected: false, action: null },
   recursive: { selected: false, action: null },
+  almost_all: { selected: false, action: null },
   help: { selected: false, action: () => { usageMessage(FLAGS) } },
-  long: { selected: false, action: (entries: Entry[]) => { return entries } },
-  type: { selected: false, action: (entries: Entry[]) => { return entries } },
-  size: { selected: false, action: Size },
-  owner: { selected: false, action: (entries: Entry[]) => { return entries } },
-  group: { selected: false, action: (entries: Entry[]) => { return entries } },
-  human: { selected: false, action: (entries: Entry[]) => { return entries } },
-  author: { selected: false, action: (entries: Entry[]) => { return entries } },
-  almost_all: { selected: false, action: (entries: Entry[]) => { return entries } }
-}
-
-//Gets file size
-function Size(entries: Entry[]): Entry[] {
-  for (const entry of entries) {
-    entry.size = `${getColor("$orange")}${entry.baseEnt.size.toString().padStart(4, "0")} ${getColor("$reset")}`
-  }
-  return entries;
+  all: { selected: false, action: (entries: Entry[]) => ["..", "."].forEach(e => entries.unshift(new Entry(e))) },
 }
