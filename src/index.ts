@@ -1,24 +1,28 @@
 #! /usr/bin/env node
 import { join } from "node:path"
 import { statSync } from "node:fs"
-import { argv, env } from "node:process"
 import { log as print } from "node:console"
-import { Config, Entry } from "./types/types.js"
+import { argv, env, exit } from "node:process"
 import { readdir, readFile } from "node:fs/promises"
+import Entry, { Config, Entry_type } from "./types/types.js"
 import { OPTIONS, FLAGS, SELECTED_PATHS } from "./options.js"
-import { getColor, badOptionMessage, badArgumentMessage } from "./utils.js"
+import { badOptionMessage, badArgumentMessage } from "./utils.js"
 
 const HOME = env.HOME
 const PASSED_ARGS = argv.slice(2)
 const default_config_file_path = join(`${HOME}`, ".config/licon/config.json")
 const config_file_path = env.licon_config ?? default_config_file_path;
 
-const default_config = {
-  "file": { "char": "", "extentions": [], "color": "" },
-  "folder": { "char": "", "extentions": [], "color": "" }
+export const default_config = {
+  Socket: { icon: "", color: "$PURPLE", icon_color: "$RED" },
+  Compressed: { icon: "", color: "RED", icon_color: "$RED" },
+  FIFO: { icon: "|", color: "$ORANGE", icon_color: "$ORANGE" },
+  Regular: { icon: "", color: "$WHITE", icon_color: "$WHITE" },
+  Directory: { icon: "", color: "$BLUE", icon_color: "$BLUE" },
+  Executable: { icon: "", color: "$GREEN", icon_color: "$RED" },
 }
 
-let config: Config
+export let config: Config
 
 // try reading the configuration file
 try {
@@ -76,47 +80,17 @@ function setSelectedFlags(passed_args: string[]) {
 
 setSelectedFlags(PASSED_ARGS)
 
-function matchFile(config: Config, entry: Entry) {
-  for (const key in config) {
-    const ent_name = entry.isDirectory() ? entry.name + "/" : entry.name
-    const { color, char, extentions } = config[key]
-    if (extentions.some(ext => ent_name.endsWith(ext))) {
-      entry.icon = char
-      entry.icon_color = getColor(color)
-      return entry
-    }
-  }
-  let icon = entry.isDirectory() ? default_config.folder.char : default_config.file.char
-  entry.icon = icon
-  entry.icon_color = getColor("$blue")
-  return entry
-}
-
 function transformEntries(entries: Entry[]) {
   // if -a flag not passed remove files starting with period (.)
   if (!(OPTIONS.all.selected || OPTIONS.almost_all.selected)) {
     entries = entries.filter((e: Entry) => !e.name.startsWith("."))
   }
-  // if -a flag passed add the current(.) and parent(..) directories
-  if (OPTIONS.all.selected) {
-    for (let dirName of ["..", "."]) {
-      const ent = new Entry(dirName)
-      ent.name = dirName
-      ent.isDirectory = () => true
-      entries.unshift(ent)
-    }
-  }
-
   for (const key in OPTIONS) {
     const option = OPTIONS[key];
     // if option is selected and option has a transform action call the action with entries as arg
     if (option.selected && option.action) option.action(entries)
   }
 
-  // add the ICONS
-  for (const entry of entries) {
-    matchFile(config, entry)
-  }
   return entries
 }
 
@@ -142,8 +116,11 @@ async function ListEntries(selections: string[]) {
     } catch (err) {
       // if entry selection is a file list the file
       if (err.errno == -20) entries.push(new Entry(selection))
+      else if (err.errno == -2) {
+        print(err.message)
+        exit(1)
+      }
       else {
-        // print(err.message.substring(err.message.indexOf(":") + 2))
         throw err
       }
     }
@@ -151,7 +128,7 @@ async function ListEntries(selections: string[]) {
     entries = transformEntries(entries)
 
     if (OPTIONS.recursive.selected) print(`${selection}:`)
-    entries.forEach(entry => entry.print())
+    entries.forEach(entry => entry.print(OPTIONS))
 
     // add a blank line if it is not the last listed entry
     if (selections.indexOf(selection) !== selections.length - 1 || OPTIONS.recursive.selected) print("")
@@ -160,7 +137,7 @@ async function ListEntries(selections: string[]) {
       // remove "." and ".." before recursion
       if (OPTIONS.all.selected) entries.splice(0, 2)
 
-      entries.filter(e => e.isDirectory()).forEach(e => ListEntries([join(e.parentPath, e.name)]))
+      entries.filter(e => e.type == Entry_type.Directory).forEach(e => ListEntries([e.fullPath]))
     }
   }
 }
