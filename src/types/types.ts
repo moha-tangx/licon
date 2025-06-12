@@ -1,54 +1,43 @@
-import { Stats, statSync } from "node:fs";
-import { join, parse } from "node:path";
+import Entry from "./entry.js";
 
-export class Entry {
-  icon: string;
-  size: string;
-  type: string;
-  name: string;
-  icon_color: string;
-  group: string;
-  owner: string;
-  baseEnt: Stats;
-  parentPath: string;
-  constructor(
-    name: string,
-    parentPath = "",
-    icon = "",
-    color = "",
-    size = "",
-    group = "",
-    owner = "",
-    type = ""
-  ) {
-    this.icon = icon;
-    this.type = type;
-    this.name = parse(join(parentPath, name)).base;
-    this.size = size;
-    this.group = group;
-    this.icon_color = color;
-    this.owner = owner;
-    this.parentPath = parentPath;
-    this.baseEnt = statSync(join(parentPath, name));
-  }
-  isDirectory(): boolean {
-    return this.baseEnt.isDirectory();
-  }
-  print() {
-    const reset = "\x1B[0m";
-    const ent = `${this.group}${this.owner}${this.size}${this.icon_color}${this.icon} ${reset}${this.name}${this.type}`;
-    console.log(ent);
-  }
+export default Entry
+
+export enum Entry_type {
+  FIFO = "FIFO",
+  Link = "Link",
+  Socket = "Socket",
+  Regular = "Regular",
+  Directory = "Directory",
+  Executable = "Executable",
+  Compressed = "Compressed",
+}
+
+export enum Entry_symbol {
+  FIFO = "|",
+  Link = "@",
+  Socket = "=",
+  Directory = "/",
+  Executable = "*"
+}
+
+export const Entry_color = {
+  FIFO: "$ORANGE",
+  Link: "$MAGENTA",
+  Regular: "$WHITE",
+  Socket: "$PURPLE",
+  Compressed: "$RED",
+  Directory: "$BLUE",
+  Executable: "$GREEN",
 }
 
 export type Config = {
-  [name: string]: { char: string; extentions?: string[]; color?: string };
+  [name: string]: { icon?: string; extentions?: string[]; color?: string, icon_color?: string };
 };
 
 export type Options = {
   [option: string]: {
     selected: boolean | string;
-    action: ((...args: any[]) => any | void) | null;
+    action?: ((...args: any[]) => any | void) | null;
   };
 };
 
