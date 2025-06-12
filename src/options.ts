@@ -8,12 +8,12 @@ export const FLAGS: Flags = {
   "l": { option: "long", desc: "long list" },
   "g": { option: "group", desc: "show group" },
   "s": { option: "size", desc: "show file size" },
-  "F": { option: "type", desc: "show file type " },
+  "F": { option: "symbol", desc: "show file sybol" },
   "A": { option: "almost_all", desc: "almost all" },
   "help": { option: "help", desc: "shows this help message" },
+  "h": { option: "help", desc: "short for help" },
   "o": { option: "owner", desc: "shows the owner of the entry" },
-  "h": { option: "human", desc: "makes file size human readble" },
-  "author": { option: "author", desc: "show author of the entry" },
+  "author": { option: "owner", desc: "show author of the entry" },
   "a": { option: "all", desc: "lists all entries including hidden ones" },
   "R": { option: "recursive", desc: "prints directory entries and all subDirectories entries" }
 }
