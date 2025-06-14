@@ -91,7 +91,7 @@ function getEntryConfig(ent: Entry) {
   // match config by file extension or name in user config
   for (const key in config) {
     const { extentions } = config[key]
-    if (extentions.some(e => ent.name.endsWith(e))) {
+    if (extentions?.some(e => ent.name.endsWith(e))) {
       return { ...default_config[ent.type], ...config[key] }
     }
   }
