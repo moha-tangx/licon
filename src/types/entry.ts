@@ -92,10 +92,10 @@ function getEntryConfig(ent: Entry) {
   for (const key in config) {
     const { extentions } = config[key]
     if (extentions.some(e => ent.name.endsWith(e))) {
-      return config[key]
+      return { ...default_config[ent.type], ...config[key] }
     }
   }
-  return config[ent.type?.toLowerCase()] ?? default_config[ent.type]
+  return { ...default_config[ent.type], ...config[ent.type?.toLowerCase()] }
 }
 
 function printEntry(ent: Entry, options: Options) {
