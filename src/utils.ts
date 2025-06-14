@@ -19,7 +19,7 @@ const COLORS = {
 };
 
 export function getColor(color: string) {
-  return color?.startsWith("$") ? COLORS[color.substring(1).toUpperCase()] : color
+  return color?.startsWith("$") ? COLORS[color.substring(1).toUpperCase()] : color ?? ""
 }
 
 export function badOptionMessage(prog_name: string, passed_opt: string) {
