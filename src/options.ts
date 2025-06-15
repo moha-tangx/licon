@@ -36,6 +36,6 @@ export const OPTIONS: Options = {
 }
 
 function printTotalSize(entries: Entry[]) {
-  const totalSize = entries.map(e => e.size).reduce((p, c) => p + c);
+  const totalSize = entries.map(e => e.size).concat(0).reduce((p, c) => p + c);
   print("total", colorize(fomartSize(totalSize), "$ORANGE"))
 }
