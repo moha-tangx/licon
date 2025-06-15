@@ -96,7 +96,7 @@ function getEntryConfig(ent: Entry) {
       return { ...default_config[ent.type], ...config[key] }
     }
   }
-  return { ...default_config[ent.type], ...config[ent.type?.toLowerCase()] }
+  return { ...default_config[ent.type ?? Entry_type.Regular], ...config[ent.type?.toLowerCase()] }
 }
 
 function printEntry(ent: Entry, options: Options) {
