@@ -64,3 +64,27 @@ export function usageMessage(FLAGS: Flags) {
 
   exit(0)
 }
+
+
+export function fomartSize(size: number) {
+  let suffix = "B"
+  const K = 1_000; //Thousand bytes -> Kilobyte
+  const M = 1_000_000; //Million bytes -> Megabyte
+  const G = 1_000_000_000; // Billion bytes -> Gigabyte
+  const T = 1_000_000_000_000; // Trillion bytes -> Terabyte
+
+  const ranges = { K: [K, M - 1], M: [M, G - 1], G: [G, T - 1], T: [T, Infinity] }
+
+  for (const key in ranges) {
+    const [min, max] = ranges[key]
+    if ((min <= size) && (size <= max)) {
+      suffix = key
+      return (size / min).toFixed(1).padStart(5, "0") + suffix
+    }
+  }
+  return size.toFixed(1).padStart(5, '0') + suffix
+}
+
+export function colorize(item: any, color: string) {
+  return getColor(color) + item + getColor("$RESET")
+}

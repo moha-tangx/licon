@@ -1,8 +1,8 @@
-import { getColor } from "../utils.js";
 import { join, parse } from "node:path";
 import { log as print } from "node:console";
 import { constants } from "node:fs/promises";
 import { statSync, accessSync } from "node:fs";
+import { colorize, fomartSize, getColor } from "../utils.js";
 import { config, default_config } from "../index.js";
 import { Entry_type, Entry_symbol, Options } from "./types.js";
 
@@ -84,7 +84,7 @@ function getEntrySymbol(ent: Entry) {
 }
 
 function getEntrySize(ent: Entry) {
-  return getColor("$ORANGE") + statSync(ent.fullPath).size.toFixed(0).padStart(4, "0").slice(0, 4) + getColor("$RESET") + " "
+  return statSync(ent.fullPath).size
 }
 
 function getEntryConfig(ent: Entry) {
@@ -101,9 +101,9 @@ function getEntryConfig(ent: Entry) {
 
 function printEntry(ent: Entry, options: Options) {
   let { icon, group, owner, name, size, color, icon_color, symbol } = ent
-  size = options.size.selected ? size : ""
   group = options.group.selected ? group : ""
   owner = options.owner.selected ? owner : ""
   symbol = options.symbol.selected ? symbol : ""
+  size = options.size.selected ? colorize(fomartSize(size) + " ", "$ORANGE") : ""
   print(`${size}${group}${owner}${icon_color}${icon}${getColor("$RESET")} ${getColor(color)}${name}${getColor("$RESET")}${symbol}`)
 }
